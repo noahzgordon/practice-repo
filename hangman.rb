@@ -10,12 +10,11 @@ class Hangman
   
   def play
     length = referee.pick_secret_word
-    partial_word = '_' * length
+    partial_word = '*' * length
     
     guesser.receive_secret_length(length)
     
     until won?
-      
       guess = guesser.guess
     
       correct_places = referee.check_guess(guess)
@@ -48,15 +47,21 @@ class Hangman
   attr_accessor :partial_word, :guess, :wrong_guesses
   
   def won?
+    return true unless partial_word.chars.include?('*')
+    return true if wrong_guesses >= 7
     
+    false
   end
   
   def winner
-    
+    guesser unless partial_word.chars.include?('*')
+    referee if wrong_guesses >= 7
   end
   
   def update_word(indices)
+    wrong_guesses += 1 if indices.empty?
     
+    indices.each { |i| partial_word[i] = guess }
   end
 end
 
