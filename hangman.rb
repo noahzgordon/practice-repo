@@ -27,13 +27,13 @@ class Hangman
       
       update_word(correct_places)
       
-      guesser.handle_response(partial_word, @guess, correct)
+      guesser.handle_response(@partial_word, @guess, correct)
     end
     
     if winner == :referee
       puts "Referee wins!"
     else
-      puts "Guesser wins!"
+      puts "Guesser wins! Is this your word? #{@partial_word} ;)"
     end
     
     # puts "Play again? (y/n)"
@@ -105,10 +105,14 @@ class ComputerPlayer
     most_common_letters = ['e', 't', 'a', 'o', 'i', 'n', 's', 'h', 'r', 'd', 'l', 'c', 'u', 'm', 'w', 'f', 'g', 'y', 'p', 'b', 'v', 'k', 'j', 'x', 'q', 'z']
   
     if @trimmed_dictionary.count < 1000
-      make_smart_guess
+      guess = make_smart_guess
     else
-      most_common_letters.find { |letter| !@guessed_letters.include?(letter)}
+      guess = most_common_letters.find { |letter| !@guessed_letters.include?(letter)}
     end
+    
+    @guessed_letters << guess
+    
+    guess
   end
   
   def handle_response(partial_word, guess, correct)
@@ -124,10 +128,17 @@ class ComputerPlayer
   attr_accessor :dictionary, :trimmed_dictionary, :secret_word
   
   def cut_dictionary_when_right(partial_word)
-    # takes only those words which leave only asterisks
-    # when their characters are subtracted from the partial word
+    # checks all non-asterisk chars against the partial word
+    # removes non-matching words from the dictionary
     @trimmed_dictionary.select! do |word|
-      (partial_word.chars - word.chars).all? { |char| char == '*' }
+      
+      match = true
+      partial_word.chars.each_with_index do |char, i|
+        next if char == '*'
+        match = false unless char == word[i]
+      end
+      
+      match
     end
   end
   
@@ -138,12 +149,10 @@ class ComputerPlayer
   
   def make_smart_guess
     # guesses the letter most-represented among the words left 
-    dict_chars = @trimmed_dictionary.to_a.join.split('')
+    dict_chars = @trimmed_dictionary.to_a.join('').split('')
     dict_chars.select! { |char| !@guessed_letters.include?(char) }
     
     guess = dict_chars.max_by { |char| dict_chars.count(char) }
-    
-    @guessed_letters << guess
     
     guess
   end
