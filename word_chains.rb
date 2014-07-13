@@ -14,7 +14,7 @@ class WordChainer
     @current_words = [source]
     @all_seen_words = { source => nil }
     
-    explore_current_words
+    explore_current_words(target)
     
     path = build_path(target)
     
@@ -27,7 +27,7 @@ class WordChainer
 
   private  
   
-  def explore_current_words
+  def explore_current_words(target)
     until @current_words.empty?
       new_current_words = []
       
@@ -38,6 +38,8 @@ class WordChainer
           
           new_current_words << adj_word
           @all_seen_words[adj_word] = cur_word
+          
+          return nil if adj_word == target
         end
       end
       
